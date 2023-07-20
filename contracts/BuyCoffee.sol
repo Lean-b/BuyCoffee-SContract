@@ -3,8 +3,11 @@
 pragma solidity 0.8.18;
 
 import "./Ownable.sol";
-contract BuyCoffee is Ownable{
-    
+
+contract BuyCoffee is Ownable {
+    //Nombre del dueño.
+    string public name;
+
     //Estructura del mensaje para comprar un cafe.
     struct Box {
         address from;
@@ -24,7 +27,9 @@ contract BuyCoffee is Ownable{
         string message
     );
 
-    constructor() {}
+    constructor(string memory _name) {
+        name = _name;
+    }
 
     /**
      * @dev Funcion para comprar un cafe.
@@ -51,24 +56,40 @@ contract BuyCoffee is Ownable{
     }
 
     /**
-     * @dev Funcion para el retiro de ether.
+     * @dev Funcion para retirar todos los ether.
      */
-    function withdrawCoffee() public OnlyOwner {
-        address payable to = payable(msg.sender);
-        to.transfer(getBalance());
+    function withdrawAll() public OnlyOwner {
+        require(
+            address(this).balance >= 0,
+            "El contrato no tiene sueficientes ether para retirar"
+        );
+        (bool callSucces, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+        require(callSucces, "No se pueden envia los ether");
     }
 
-
+    /**
+     * @dev Funcion para retirar ether,segun la cantidad indicada.
+     */
+    function withdraw(uint256 _amount) public  {
+        require(
+            _amount > 0,
+            "No puedes retirar una cantidad menor a 0 ether"
+        );
+        require(
+            address(this).balance >= _amount,
+            "El contrato no tiene suficientes ether para retirar"
+        );
+        (bool callSuccess, ) = msg.sender.call{value: _amount}("");
+        require(callSuccess, "Fallo de envio de ethers");
+    }
 
     /**
      * @dev Funcion para saber el balance de ether en el smart contract.
      * @return Devuelve el balance en ether como un valor de tipo uint256.
      */
-    function getBalance() public view  OnlyOwner returns (uint256) {
+    function getBalance() public view OnlyOwner returns (uint256) {
         return address(this).balance;
     }
-
-
-
-  
 }
