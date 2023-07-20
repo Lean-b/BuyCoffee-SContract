@@ -72,7 +72,7 @@ contract BuyCoffee is Ownable {
     /**
      * @dev Funcion para retirar ether,segun la cantidad indicada.
      */
-    function withdraw(uint256 _amount) public  {
+    function withdraw(uint256 _amount) public OnlyOwner {
         require(
             _amount > 0,
             "No puedes retirar una cantidad menor a 0 ether"
